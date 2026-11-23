@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FBF8F0">
+<title>Digital Business Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style id="app-css">
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --serif: "Playfair Display", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --sans: "Source Sans 3", "Source Sans Pro", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  /* the card is always ivory, navy and gold, in light and dark mode */
+  --navy: #0A2342;
+  --navy-2: #15396B;
+  --gold: #B8892B;
+  --gold-2: #D9B25A;
+  --gold-3: #EBD08A;
+  --ivory: #FBF8F0;
+
+  /* the page around the card and the generator follow the viewer's theme */
+  --page: #F3EEE0;
+  --page-2: #E8E0C9;
+  --page-ink: #14213A;
+  --muted: #5B6273;
+  --accent: #0A2342;
+  --panel: #FFFEFA;
+  --panel-line: #DDD2B2;
+  --input-bg: #FFFFFF;
+  --danger: #9B2C2C;
+  --focus: #B8892B;
+}
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px); min-height: 100%;
+  background: radial-gradient(120% 80% at 50% 0%, var(--page) 0%, var(--page-2) 100%) fixed no-repeat var(--page);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0C1424; --page-2: #070C17; --page-ink: #EDE7D4; --muted: #A9AFBD;
+    --accent: #E3C675; --panel: #131C30; --panel-line: #2D3A57; --input-bg: #0C1424; --danger: #F09A9A;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0C1424; --page-2: #070C17; --page-ink: #EDE7D4; --muted: #A9AFBD;
+  --accent: #E3C675; --panel: #131C30; --panel-line: #2D3A57; --input-bg: #0C1424; --danger: #F09A9A;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; min-height: 100vh; background: transparent; color: var(--page-ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+a { color: inherit; }
+h1, h2, h3, p { margin: 0; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.ico { width: 20px; height: 20px; flex: none; }
+
+/* ---------- the card ---------- */
+.stage { display: flex; flex-direction: column; align-items: center; padding: 18px 14px 40px; }
+.ownerbar { width: min(100%, 480px); margin-bottom: 12px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; min-height: 40px; border-radius: 999px; border: 1px solid var(--panel-line); background: var(--panel); color: var(--accent); text-decoration: none; font-size: 14px; cursor: pointer; }
+.card {
+  position: relative; isolation: isolate; overflow: hidden; width: min(100%, 480px);
+  background: linear-gradient(180deg, #FFFDF8 0%, var(--ivory) 55%, #F5EEDB 100%);
+  color: var(--navy); border-radius: 18px; padding: 30px 26px 0;
+  box-shadow: 0 34px 70px -34px rgba(8, 25, 55, .6), 0 0 0 1px rgba(184, 137, 43, .25);
+}
+.card > * { position: relative; z-index: 1; }
+.card > .swoosh, .card > .hero { position: absolute; z-index: 0; pointer-events: none; }
+.swoosh.tl { top: 0; left: 0; width: 200px; height: 160px; }
+.swoosh.br { bottom: 0; right: 0; width: 250px; height: 112px; }
+.hero {
+  top: 0; right: 0; width: 70%; height: 320px; object-fit: cover; opacity: .9;
+  -webkit-mask-image: linear-gradient(to left, #000 35%, transparent), linear-gradient(to bottom, #000 55%, transparent);
+  -webkit-mask-composite: source-in; mask-image: linear-gradient(to left, #000 35%, transparent), linear-gradient(to bottom, #000 55%, transparent); mask-composite: intersect;
+}
+.brand { display: flex; align-items: center; gap: 14px; min-height: 56px; max-width: 78%; margin-top: 18px; }
+.brand img { max-height: 52px; max-width: 110px; width: auto; display: block; }
+.brand .vr { width: 1px; align-self: stretch; min-height: 40px; background: var(--navy); opacity: .85; }
+.brand .org { font-family: var(--serif); font-weight: 500; font-size: 20px; line-height: 1.12; color: var(--navy); }
+.person { margin-top: 44px; font-family: var(--serif); font-weight: 600; font-size: clamp(42px, 13vw, 60px); line-height: 1.02; letter-spacing: -.01em; color: var(--navy); overflow-wrap: anywhere; }
+.bar { width: 64px; height: 3px; margin: 18px 0 18px; background: linear-gradient(90deg, var(--gold), var(--gold-2)); }
+.role { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: clamp(21px, 5.8vw, 27px); line-height: 1.2; color: var(--navy); }
+.unit { margin-top: 20px; border-left: 2px solid var(--gold); padding: 2px 0 2px 14px; font-size: 14px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--navy); }
+.contact { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; margin-top: 28px; }
+.crows { min-width: 0; }
+.crow { display: flex; align-items: center; gap: 14px; padding: 8px 0; text-decoration: none; color: var(--navy); font-size: 17px; line-height: 1.3; }
+.crow .t { min-width: 0; overflow-wrap: break-word; }
+a.crow:hover .t { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+.dot { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #3A2A06; background: radial-gradient(circle at 35% 28%, #F7E6B0, #D6AE55 75%); box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 3px 8px -3px rgba(110, 80, 10, .6); }
+.dot .ico { width: 19px; height: 19px; stroke-width: 1.9; }
+.qrcol { align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding-left: 16px; border-left: 1px solid var(--gold-2); }
+.qrbox {
+  width: 132px; height: 132px; padding: 10px; position: relative;
+  background:
+    linear-gradient(var(--gold), var(--gold)) 0 0 / 20px 2px no-repeat, linear-gradient(var(--gold), var(--gold)) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) 100% 0 / 20px 2px no-repeat, linear-gradient(var(--gold), var(--gold)) 100% 0 / 2px 20px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) 0 100% / 20px 2px no-repeat, linear-gradient(var(--gold), var(--gold)) 0 100% / 2px 20px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) 100% 100% / 20px 2px no-repeat, linear-gradient(var(--gold), var(--gold)) 100% 100% / 2px 20px no-repeat;
+}
+.qrbox img { width: 100%; height: 100%; display: block; }
+.qrcap { font-size: 11.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; text-align: center; line-height: 1.35; color: var(--navy); }
+@media (max-width: 440px) {
+  .qrbox { width: 120px; height: 120px; padding: 9px; }
+  .qrcol { padding-left: 12px; }
+  .contact { gap: 12px; }
+  .dot { width: 36px; height: 36px; }
+  .crow { font-size: 16px; gap: 12px; }
+}
+@media (max-width: 379px) {
+  .contact { grid-template-columns: 1fr; }
+  .qrcol { border-left: 0; border-top: 1px solid var(--gold-2); padding: 16px 0 0; }
+}
+.btn-navy {
+  display: flex; align-items: center; justify-content: center; gap: 12px; width: min(100%, 360px); min-height: 58px; margin: 30px auto 0;
+  border-radius: 999px; border: 2px solid var(--gold-2); cursor: pointer;
+  background: linear-gradient(180deg, #17407A 0%, var(--navy) 100%); color: var(--ivory);
+  font-family: var(--serif); font-weight: 500; font-size: 22px; letter-spacing: .01em;
+  box-shadow: 0 0 0 1px rgba(184, 137, 43, .35), 0 12px 22px -12px rgba(10, 35, 66, .8);
+}
+.btn-navy .ico { width: 24px; height: 24px; stroke-width: 1.7; }
+.btn-navy:active { transform: translateY(1px); }
+.sheetlink { display: block; margin: 8px auto 0; background: none; border: 0; padding: 8px 12px; min-height: 40px; color: var(--navy); font-size: 15px; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 4px; cursor: pointer; }
+.nodes { display: block; width: calc(100% + 52px); margin: 10px -26px 0; height: auto; }
+.foot { margin: -6px 0 0; padding-bottom: 54px; font-size: 13px; color: var(--navy); text-align: center; min-height: 24px; }
+.foot a { color: var(--navy); }
+
+.center { min-height: 70vh; display: grid; place-items: center; padding: 24px; text-align: center; }
+.center .inner { max-width: 360px; }
+.center .orgline { font-family: var(--serif); font-size: 22px; color: var(--accent); }
+.center h1 { font-family: var(--serif); font-weight: 600; font-size: 30px; margin: 18px 0 8px; }
+.center p { color: var(--muted); }
+
+/* ---------- generator ---------- */
+.admin { width: min(100%, 980px); margin: 0 auto; padding: 24px 16px 64px; }
+.admin-head { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
+.admin-head h1 { font-family: var(--serif); font-weight: 600; font-size: 28px; color: var(--accent); }
+.admin-head .orgline { font-family: var(--serif); font-size: 20px; color: var(--muted); }
+.panel { background: var(--panel); border: 1px solid var(--panel-line); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.panel h2 { font-family: var(--serif); font-weight: 600; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
+.steps { margin: 8px 0 16px; padding-left: 20px; color: var(--muted); font-size: 15px; max-width: 70ch; }
+.steps li { margin: 4px 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.grid2 .full { grid-column: 1 / -1; }
+@media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+.fld label, .fld .lbl { display: block; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.fld input[type=text], .fld input[type=url], .fld input[type=email], .fld input[type=tel], .fld textarea {
+  width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--panel-line); border-radius: 4px; background: var(--input-bg); color: var(--page-ink);
+}
+.fld textarea { min-height: 150px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+.fld input:focus, .fld textarea:focus { border-color: var(--focus); outline: 2px solid color-mix(in srgb, var(--focus) 35%, transparent); outline-offset: 0; }
+.fld .hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.fld .err { font-size: 13px; color: var(--danger); margin-top: 4px; }
+.upl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.upl img { max-height: 56px; max-width: 150px; background: #fff; border: 1px solid var(--panel-line); border-radius: 4px; padding: 4px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 16px; border-radius: 4px; border: 1px solid var(--panel-line); background: transparent; color: var(--page-ink); cursor: pointer; text-decoration: none; font-size: 15px; }
+.btn:hover { border-color: var(--gold); }
+.btn.primary { background: linear-gradient(180deg, #17407A, var(--navy)); border-color: var(--gold-2); color: var(--ivory); font-weight: 600; }
+.btn.danger { color: var(--danger); }
+.btn.small { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+.status { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--panel-line); color: var(--muted); }
+.status.ok { color: var(--accent); border-color: var(--gold); }
+.status.warn { color: var(--danger); border-color: var(--danger); }
+.list-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.emp { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--panel-line); }
+.emp .mono { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--gold); font-family: var(--serif); font-weight: 600; font-size: 17px; color: var(--accent); flex: none; }
+.emp .who { flex: 1 1 200px; min-width: 0; }
+.emp .nm { font-weight: 600; overflow-wrap: anywhere; }
+.emp .em { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.emp .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.empty { padding: 28px 8px; text-align: center; color: var(--muted); border-top: 1px solid var(--panel-line); }
+.note { font-size: 14px; color: var(--muted); max-width: 70ch; }
+.note.warn { color: var(--danger); }
+
+.banner { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; border: 1px solid var(--gold); background: var(--panel); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+.banner .note { display: inline; }
+/* ---------- dialogs & toast ---------- */
+.overlay { position: fixed; inset: 0; z-index: 50; background: rgba(6, 14, 30, .6); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: calc(16px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px)); }
+.dialog { width: min(100%, 460px); margin: auto; background: var(--panel); color: var(--page-ink); border: 1px solid var(--gold); border-radius: 8px; padding: 20px; }
+.dialog.wide { width: min(100%, 640px); }
+.dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.dialog-head h2 { font-family: var(--serif); font-weight: 600; font-size: 24px; color: var(--accent); }
+.icon-btn { width: 44px; height: 44px; border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: var(--muted); }
+.qrwrap { display: grid; place-items: center; margin: 4px 0 14px; }
+.qrwrap img { width: min(100%, 300px); height: auto; border: 1px solid var(--panel-line); border-radius: 4px; background: #FBF8F0; }
+.urlrow { display: flex; gap: 8px; }
+.urlrow input { flex: 1; min-width: 0; }
+.toast { position: fixed; left: 50%; transform: translate(-50%, 12px); z-index: 60; max-width: min(92vw, 440px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: #0A2342; color: #FBF8F0; border: 1px solid #D9B25A; padding: 11px 16px; border-radius: 6px; font-size: 14.5px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.vtext { width: 100%; min-height: 150px; margin-top: 10px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; padding: 10px; border: 1px solid var(--panel-line); border-radius: 4px; background: var(--input-bg); color: var(--page-ink); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="application/json" id="ogc-data">{"v":1,"updatedAt":0,"org":{"name":"Georgia Institute of Technology","unit":"Office of General Counsel","website":"","baseLink":"","logo":"","hero":""},"employees":[{"id":"pravalya01","slug":"pravalya-k7m3q","first":"Pravalya","last":"","title":"Legal Operations Manager","dept":"","email":"pravalya@gatech.edu","phone":"","street":"","city":"Atlanta","region":"GA","postal":"","country":"","linkedin":"https://www.linkedin.com/in/pravalya"}]}</script>
+<script id="app-src">
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     OGC Digital Business Card Generator: one self-contained HTML file.
+
+     * Anyone who opens   your-link#employee-code   sees that employee's card.
+     * You open           your-link#admin           to manage cards.
+     * Edits are kept in your browser as a draft. "Download updated file"
+       bakes them into a new copy of this file, which you upload to your host.
+     ------------------------------------------------------------------ */
+  var HEAD = '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<meta name="robots" content="noindex, nofollow">\n<meta name="theme-color" content="#FBF8F0">\n<title>Digital Business Cards</title>\n<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">\n';
+  var SRC = document.getElementById('app-src').textContent;
+  var CSS = document.getElementById('app-css').textContent;
+  var DRAFT_KEY = 'ogc-card-draft-v1';
+  var app = document.getElementById('app');
+  var DATA = loadData();
+  var BASE_TS = DATA.updatedAt || 0;
+  var S = { admin: false, dirty: false, restored: false };
+
+  function loadData() {
+    try {
+      var d = JSON.parse(document.getElementById('ogc-data').textContent);
+      d.org = d.org || {}; d.employees = d.employees || [];
+      return d;
+    } catch (e) {
+      return { v: 1, updatedAt: 0, org: { name: 'OGC', unit: '', website: '', baseLink: '', logo: '', hero: '' }, employees: [] };
+    }
+  }
+  function buildDoc(state) {
+    state.updatedAt = Date.now();
+    var json = JSON.stringify(state).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    return '<!DOCTYPE html>\n<html lang="en">\n<head>\n' + HEAD + '<style id="app-css">' + CSS + '</style>\n</head>\n<body>\n<div id="app"></div>\n' +
+      '<script type="application/json" id="ogc-data">' + json + '<\/script>\n<script id="app-src">' + SRC + '<\/script>\n</body>\n</html>\n';
+  }
+  function readDraft() {
+    try { var d = JSON.parse(localStorage.getItem(DRAFT_KEY)); return d && d.data && d.base === BASE_TS ? d : null; } catch (e) { return null; }
+  }
+  function writeDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ base: BASE_TS, data: DATA })); } catch (e) {} }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+  function route() { return (location.hash || '').replace(/^#/, ''); }
+  if (route() === 'admin') { var dr = readDraft(); if (dr) { DATA = dr.data; S.dirty = true; S.restored = true; } else clearDraftIfStale(); }
+  function clearDraftIfStale() { try { var d = JSON.parse(localStorage.getItem(DRAFT_KEY)); if (d && d.base !== BASE_TS) clearDraft(); } catch (e) {} }
+  function hostedUrl() { return location.protocol === 'https:' ? location.href.replace(/[#?].*$/, '') : ''; }
+  function baseLink() { return safeHttps(trim(DATA.org.baseLink)) || hostedUrl(); }
+
+  /* ---------------------------- QR encoder (self-contained, byte mode, levels L and M) ---------------------------- */
+  var QR = (function () {
+    var ECC_PER_BLOCK = {
+      L: [-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      M: [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28]
+    };
+    var NUM_BLOCKS = {
+      L: [-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+      M: [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49]
+    };
+    var FORMAT_BITS = { L: 1, M: 0 };
+    function rawModules(v) { var r = (16 * v + 128) * v + 64; if (v >= 2) { var na = Math.floor(v / 7) + 2; r -= (25 * na - 10) * na - 55; if (v >= 7) r -= 36; } return r; }
+    function dataCodewords(v, e) { return Math.floor(rawModules(v) / 8) - ECC_PER_BLOCK[e][v] * NUM_BLOCKS[e][v]; }
+    function utf8(str) {
+      if (typeof TextEncoder === 'function') return Array.prototype.slice.call(new TextEncoder().encode(str));
+      var s = unescape(encodeURIComponent(str)), out = []; for (var i = 0; i < s.length; i++) out.push(s.charCodeAt(i)); return out;
+    }
+    function gfMul(x, y) { var z = 0; for (var i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; }
+    function rsDivisor(deg) {
+      var r = []; for (var i = 0; i < deg - 1; i++) r.push(0); r.push(1);
+      var root = 1;
+      for (var k = 0; k < deg; k++) { for (var j = 0; j < deg; j++) { r[j] = gfMul(r[j], root); if (j + 1 < deg) r[j] ^= r[j + 1]; } root = gfMul(root, 2); }
+      return r;
+    }
+    function rsRemainder(data, div) {
+      var r = div.map(function () { return 0; });
+      data.forEach(function (b) { var f = b ^ r.shift(); r.push(0); div.forEach(function (c, i) { r[i] ^= gfMul(c, f); }); });
+      return r;
+    }
+    function interleave(data, v, e) {
+      var nb = NUM_BLOCKS[e][v], eccLen = ECC_PER_BLOCK[e][v], raw = Math.floor(rawModules(v) / 8);
+      var shortBlocks = nb - raw % nb, shortLen = Math.floor(raw / nb), blocks = [], div = rsDivisor(eccLen);
+      for (var i = 0, k = 0; i < nb; i++) {
+        var dat = data.slice(k, k + shortLen - eccLen + (i < shortBlocks ? 0 : 1)); k += dat.length;
+        var ecc = rsRemainder(dat, div); if (i < shortBlocks) dat.push(0);
+        blocks.push(dat.concat(ecc));
+      }
+      var out = [];
+      for (var x = 0; x < blocks[0].length; x++) for (var j = 0; j < blocks.length; j++) if (x !== shortLen - eccLen || j >= shortBlocks) out.push(blocks[j][x]);
+      return out;
+    }
+    function count(s, re) { return (s.match(re) || []).length; }
+    function penalty(mod, size) {
+      var p = 0, dark = 0, x, y;
+      for (var pass = 0; pass < 2; pass++) for (var a = 0; a < size; a++) {
+        var run = 1, prev = null, s = '';
+        for (var b = 0; b < size; b++) {
+          var c = pass ? mod[b][a] : mod[a][b]; s += c ? '1' : '0'; if (!pass && c) dark++;
+          if (c === prev) { run++; if (run === 5) p += 3; else if (run > 5) p += 1; } else run = 1;
+          prev = c;
+        }
+        p += 40 * (count(s, /(?=10111010000)/g) + count(s, /(?=00001011101)/g));
+      }
+      for (y = 0; y < size - 1; y++) for (x = 0; x < size - 1; x++) { var c0 = mod[y][x]; if (c0 === mod[y][x + 1] && c0 === mod[y + 1][x] && c0 === mod[y + 1][x + 1]) p += 3; }
+      var total = size * size; p += (Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1) * 10;
+      return p;
+    }
+    function encode(text, ecl) {
+      ecl = ecl === 'L' ? 'L' : 'M';
+      var bytes = utf8(String(text)), ver;
+      for (ver = 1; ver <= 40; ver++) if (4 + (ver <= 9 ? 8 : 16) + bytes.length * 8 <= dataCodewords(ver, ecl) * 8) break;
+      if (ver > 40) return null;
+      var bits = [];
+      function put(val, len) { for (var i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); }
+      put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(function (b) { put(b, 8); });
+      var cap = dataCodewords(ver, ecl) * 8;
+      put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+      for (var pad = 0xEC; bits.length < cap; pad ^= 0xEC ^ 0x11) put(pad, 8);
+      var data = [];
+      for (var i = 0; i < bits.length; i += 8) { var v = 0; for (var k = 0; k < 8; k++) v = (v << 1) | bits[i + k]; data.push(v); }
+      var words = interleave(data, ver, ecl);
+
+      var size = ver * 4 + 17, mod = [], fn = [], y, x;
+      for (y = 0; y < size; y++) { mod.push([]); fn.push([]); for (x = 0; x < size; x++) { mod[y].push(false); fn[y].push(false); } }
+      function setFn(px, py, dark) { if (px >= 0 && px < size && py >= 0 && py < size) { mod[py][px] = dark; fn[py][px] = true; } }
+      for (i = 0; i < size; i++) { setFn(6, i, i % 2 === 0); setFn(i, 6, i % 2 === 0); }
+      function finder(cx, cy) { for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++) { var d = Math.max(Math.abs(dx), Math.abs(dy)); setFn(cx + dx, cy + dy, d !== 2 && d !== 4); } }
+      finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+      var pos = [];
+      if (ver > 1) {
+        var na = Math.floor(ver / 7) + 2, step = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (na * 2 - 2)) * 2;
+        pos = [6]; for (var pp = size - 7; pos.length < na; pp -= step) pos.splice(1, 0, pp);
+      }
+      pos.forEach(function (ax, ia) { pos.forEach(function (ay, ib) {
+        if ((ia === 0 && ib === 0) || (ia === 0 && ib === pos.length - 1) || (ia === pos.length - 1 && ib === 0)) return;
+        for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++) setFn(ax + dx, ay + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }); });
+      function formatBits(mask) {
+        var d = (FORMAT_BITS[ecl] << 3) | mask, r = d;
+        for (var j = 0; j < 10; j++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+        var b = ((d << 10) | r) ^ 0x5412, bit = function (n) { return ((b >>> n) & 1) !== 0; }, n;
+        for (n = 0; n <= 5; n++) setFn(8, n, bit(n));
+        setFn(8, 7, bit(6)); setFn(8, 8, bit(7)); setFn(7, 8, bit(8));
+        for (n = 9; n < 15; n++) setFn(14 - n, 8, bit(n));
+        for (n = 0; n < 8; n++) setFn(size - 1 - n, 8, bit(n));
+        for (n = 8; n < 15; n++) setFn(8, size - 15 + n, bit(n));
+        setFn(8, size - 8, true);
+      }
+      formatBits(0);
+      if (ver >= 7) {
+        var rem = ver; for (var j = 0; j < 12; j++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+        var vb = (ver << 12) | rem;
+        for (j = 0; j < 18; j++) { var col = ((vb >>> j) & 1) !== 0, a = size - 11 + j % 3, b2 = Math.floor(j / 3); setFn(a, b2, col); setFn(b2, a, col); }
+      }
+      var bi = 0;
+      for (var right = size - 1; right >= 1; right -= 2) {
+        if (right === 6) right = 5;
+        for (var vert = 0; vert < size; vert++) for (var jj = 0; jj < 2; jj++) {
+          var xx = right - jj, upward = ((right + 1) & 2) === 0, yy = upward ? size - 1 - vert : vert;
+          if (!fn[yy][xx] && bi < words.length * 8) { mod[yy][xx] = ((words[bi >>> 3] >>> (7 - (bi & 7))) & 1) !== 0; bi++; }
+        }
+      }
+      function applyMask(m) {
+        for (var yy2 = 0; yy2 < size; yy2++) for (var xx2 = 0; xx2 < size; xx2++) {
+          var inv;
+          switch (m) {
+            case 0: inv = (xx2 + yy2) % 2 === 0; break;
+            case 1: inv = yy2 % 2 === 0; break;
+            case 2: inv = xx2 % 3 === 0; break;
+            case 3: inv = (xx2 + yy2) % 3 === 0; break;
+            case 4: inv = (Math.floor(xx2 / 3) + Math.floor(yy2 / 2)) % 2 === 0; break;
+            case 5: inv = xx2 * yy2 % 2 + xx2 * yy2 % 3 === 0; break;
+            case 6: inv = (xx2 * yy2 % 2 + xx2 * yy2 % 3) % 2 === 0; break;
+            default: inv = ((xx2 + yy2) % 2 + xx2 * yy2 % 3) % 2 === 0;
+          }
+          if (!fn[yy2][xx2] && inv) mod[yy2][xx2] = !mod[yy2][xx2];
+        }
+      }
+      var best = 0, bestP = Infinity;
+      for (var m = 0; m < 8; m++) { formatBits(m); applyMask(m); var pn = penalty(mod, size); if (pn < bestP) { bestP = pn; best = m; } applyMask(m); }
+      formatBits(best); applyMask(best);
+      return mod;
+    }
+    return { encode: encode };
+  })();
+
+  /* ---------------------------- helpers ---------------------------- */
+  function h(tag, props, kids) {
+    var el = document.createElement(tag);
+    if (props) Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (v == null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'svg') el.innerHTML = v; // static markup only, never user data
+      else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    });
+    (kids || []).forEach(function (c) {
+      if (c == null || c === false) return;
+      el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return el;
+  }
+  var SVGI = function (inner) { return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; };
+  var ICON = {
+    phone: SVGI('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>'),
+    mail: SVGI('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
+    pin: SVGI('<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>'),
+    link: SVGI('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 11v6M8 7.6v.01M12 17v-6M12 13.5a3 3 0 0 1 6 0V17"/>'),
+    save: SVGI('<path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v3h16v-3"/>')
+  };
+  function span(svg) { return h('span', { svg: svg, style: 'display:contents' }); }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function trim(v) { return String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); }
+  function fullName(e) { return trim(trim(e.first) + ' ' + trim(e.last)); }
+  function initials(e) { return ((trim(e.first).charAt(0) || '') + (trim(e.last).charAt(0) || '')).toUpperCase() || '?'; }
+  function orgName() { return trim(DATA.org.name) || 'OGC'; }
+  function unitOf(e) { return trim(e.dept) || trim(DATA.org.unit); }
+  function fileSafe(s) { return (s || 'contact').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'contact'; }
+  function telHref(p) { return 'tel:' + String(p).replace(/[^0-9+]/g, ''); }
+  function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s); }
+  function addressLines(e) {
+    var l3 = [trim(e.city), [trim(e.region), trim(e.postal)].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    return [trim(e.street), l3, trim(e.country)].filter(Boolean);
+  }
+  function mapsUrl(e) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addressLines(e).join(', ')); }
+  function normLinkedIn(v) {
+    var s = trim(v); if (!s) return '';
+    if (/^https?:\/\//i.test(s)) return s.replace(/^http:\/\//i, 'https://');
+    if (/linkedin\.com/i.test(s)) return 'https://' + s.replace(/^\/\//, '');
+    return 'https://www.linkedin.com/in/' + s.replace(/^\/+/, '').replace(/^in\//i, '');
+  }
+  function shortUrl(u) { return u.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''); }
+  function safeHttps(u) { return /^https:\/\//i.test(u || '') ? u : ''; }
+  function safeImg(u) { return /^data:image\/(png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+\/=]+$/.test(u || '') || /^https:\/\//i.test(u || '') ? u : ''; }
+
+  var RESERVED = /^(settings|sidebar|customize|upgrade|downloads|comment-|admin)/;
+  function rand(n) {
+    var a = 'abcdefghjkmnpqrstuvwxyz23456789', out = '', buf = new Uint8Array(n);
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(buf); else for (var i = 0; i < n; i++) buf[i] = Math.floor(Math.random() * 256);
+    for (var j = 0; j < n; j++) out += a.charAt(buf[j] % a.length);
+    return out;
+  }
+  function newSlug(list, first, last) {
+    var base = (first + ' ' + last).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32) || 'card';
+    var s;
+    do { s = base + '-' + rand(5); if (RESERVED.test(s)) s = 'oc-' + s; } while (list.some(function (e) { return e.slug === s; }));
+    return s;
+  }
+  function cardUrl(e) { var b = baseLink(); return b ? b.replace(/#.*$/, '') + '#' + e.slug : ''; }
+
+  function download(name, data, type) {
+    var blob = data instanceof Blob ? data : new Blob([data], { type: type || 'application/octet-stream' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (x) {} a.remove(); }, 5000);
+  }
+
+  /* ---------------------------- vCard ---------------------------- */
+  function vEsc(v) { return String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,'); }
+  function vFold(line) { var out = []; while (line.length > 74) { out.push(line.slice(0, 74)); line = ' ' + line.slice(74); } out.push(line); return out.join('\r\n'); }
+  function buildVCard(e, lean) {
+    var L = ['BEGIN:VCARD', 'VERSION:3.0'];
+    if (!lean) L.push('PRODID:-//' + vEsc(orgName()) + '//Digital Business Card//EN');
+    L.push('N:' + vEsc(trim(e.last)) + ';' + vEsc(trim(e.first)) + ';;;', 'FN:' + vEsc(fullName(e)),
+      'ORG:' + vEsc(orgName()) + (unitOf(e) ? ';' + vEsc(unitOf(e)) : ''));
+    if (trim(e.title)) L.push('TITLE:' + vEsc(trim(e.title)));
+    if (trim(e.phone)) L.push('TEL;TYPE=WORK,VOICE:' + vEsc(trim(e.phone)));
+    if (trim(e.email)) L.push('EMAIL;TYPE=INTERNET,WORK:' + vEsc(trim(e.email)));
+    if (addressLines(e).length) L.push('ADR;TYPE=WORK:;;' + [e.street, e.city, e.region, e.postal, e.country].map(function (x) { return vEsc(trim(x)); }).join(';'));
+    var li = normLinkedIn(e.linkedin);
+    if (li) { L.push('URL:' + li); if (!lean) L.push('X-SOCIALPROFILE;TYPE=linkedin:' + li); }
+    if (!lean && safeHttps(trim(DATA.org.website))) L.push('URL:' + trim(DATA.org.website));
+    if (!lean) L.push('UID:ogc-' + e.id, 'REV:' + new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''));
+    L.push('END:VCARD');
+    return (lean ? L.join('\r\n') : L.map(vFold).join('\r\n')) + '\r\n';
+  }
+  function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function saveContact(e) {
+    var text = buildVCard(e), fname = fileSafe(fullName(e)) + '.vcf';
+    var blob = new Blob([text], { type: 'text/vcard;charset=utf-8' });
+    var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    var step = Promise.resolve(false);
+    if (coarse && navigator.canShare && typeof File === 'function') {
+      step = new Promise(function (res) {
+        try {
+          var file = new File([blob], fname, { type: 'text/vcard' });
+          if (!navigator.canShare({ files: [file] })) return res(false);
+          navigator.share({ files: [file], title: fullName(e) }).then(function () { res(true); }, function (err) { res(err && err.name === 'AbortError'); });
+        } catch (x) { res(false); }
+      });
+    }
+    step.then(function (done) {
+      if (done) return;
+      if (isIOS()) {
+        var a = document.createElement('a'); a.href = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(text); a.rel = 'noopener'; a.style.display = 'none';
+        document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 3000);
+      } else download(fname, blob);
+      toast('Contact file sent to your device. If nothing opens, use “Contact details” below the button.');
+    });
+  }
+
+  /* ---------------------------- QR rendering ---------------------------- */
+  function makeQR(text, ecc) { try { return QR.encode(text, ecc || 'M'); } catch (e) { return null; } }
+  var QR_DARK = '#0A2342', QR_LIGHT = '#FBF8F0';
+  function qrSvg(m, quiet, px, transparent) {
+    quiet = quiet == null ? 4 : quiet; px = px || 1024;
+    var n = m.length, size = n + quiet * 2, d = '';
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (m[r][c]) d += 'M' + (c + quiet) + ' ' + (r + quiet) + 'h1v1h-1z';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '" width="' + px + '" height="' + px + '" shape-rendering="crispEdges">' +
+      (transparent ? '' : '<rect width="' + size + '" height="' + size + '" fill="' + QR_LIGHT + '"/>') + '<path d="' + d + '" fill="' + QR_DARK + '"/></svg>';
+  }
+  function qrCanvas(m, caption, sub) {
+    var n = m.length, size = n + 8, mod = Math.max(2, Math.floor(880 / size)), qpx = size * mod;
+    var pad = caption ? 56 : 0, foot = caption ? 150 : 0, W = qpx + pad * 2, H = qpx + pad + foot;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    x.fillStyle = QR_LIGHT; x.fillRect(0, 0, W, H);
+    x.fillStyle = QR_DARK;
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (m[r][c]) x.fillRect(pad + (c + 4) * mod, pad + (r + 4) * mod, mod, mod);
+    if (caption) {
+      x.strokeStyle = '#B8892B'; x.lineWidth = 6; x.strokeRect(18, 18, W - 36, H - 36);
+      x.strokeStyle = '#D9B25A'; x.lineWidth = 2; x.strokeRect(30, 30, W - 60, H - 60);
+      x.textAlign = 'center'; x.fillStyle = '#0A2342'; x.font = '600 46px "Playfair Display", Georgia, serif';
+      x.fillText(caption, W / 2, pad + qpx + 28, W - 140);
+      if (sub) { x.fillStyle = '#7A5A14'; x.font = 'italic 28px "Playfair Display", Georgia, serif'; x.fillText(sub, W / 2, pad + qpx + 76, W - 140); }
+    }
+    return cv;
+  }
+
+  /* ---------------------------- toast, modal, copy ---------------------------- */
+  var toastEl;
+  function toast(msg) {
+    if (!toastEl) { toastEl = h('div', { class: 'toast', role: 'status' }); document.body.appendChild(toastEl); }
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toast.t); toast.t = setTimeout(function () { toastEl.classList.remove('show'); }, 4200);
+  }
+  function copyText(t) {
+    var ok = function () { toast('Copied'); };
+    var fallback = function () {
+      var ta = h('textarea', { style: 'position:fixed;opacity:0' }); ta.value = t; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); ok(); } catch (e) { toast('Couldn’t copy. Select the text and copy it manually.'); }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, fallback); else fallback();
+  }
+  function modal(title, nodes, wide) {
+    var prev = document.activeElement;
+    var ov = h('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': title });
+    function close() { document.removeEventListener('keydown', onKey); ov.remove(); if (prev && prev.focus) try { prev.focus(); } catch (e) {} }
+    function onKey(ev) { if (ev.key === 'Escape') close(); }
+    var box = h('div', { class: 'dialog' + (wide ? ' wide' : '') }, [
+      h('div', { class: 'dialog-head' }, [h('h2', { text: title }), h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Close', text: '×', onclick: close })])
+    ].concat(nodes));
+    ov.appendChild(box);
+    ov.addEventListener('mousedown', function (ev) { if (ev.target === ov) close(); });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(ov);
+    var f = box.querySelector('input, textarea, button.btn'); if (f) f.focus();
+    return { close: close, box: box };
+  }
+  function confirmBox(title, msg, label, onYes) {
+    var m = modal(title, [h('p', { class: 'note', text: msg }), h('div', { class: 'btns' }, [
+      h('button', { class: 'btn danger', type: 'button', text: label, onclick: function () { m.close(); onYes(); } }),
+      h('button', { class: 'btn', type: 'button', text: 'Cancel', onclick: function () { m.close(); } })])]);
+  }
+
+  /* ---------------------------- the card ---------------------------- */
+  function render() {
+    clear(app);
+    var slug = route(), emp = DATA.employees.filter(function (e) { return e.slug === slug; })[0];
+    document.title = orgName() + ' Digital Business Cards';
+    window.scrollTo(0, 0);
+    if (slug === 'admin') { S.admin = true; try { sessionStorage.setItem('ogc-admin', '1'); } catch (x) {} renderAdmin(); }
+    else if (emp) renderCard(emp);
+    else if (!slug) renderMessage('Scan a colleague’s QR code to open their digital business card.', 'Digital business cards');
+    else renderMessage('This card isn’t available. It may have been removed or the link may be incomplete.', 'Card not found');
+  }
+  function renderMessage(text, title) {
+    app.appendChild(h('main', { class: 'center' }, [h('div', { class: 'inner' }, [h('div', { class: 'orgline', text: orgName() }), h('h1', { text: title }), h('p', { text: text })])]));
+  }
+
+  var SWOOSH_TL = '<svg class="swoosh tl" viewBox="0 0 200 160" aria-hidden="true" preserveAspectRatio="none"><path d="M0 0H172C112 10 50 62 0 152Z" fill="#0A2342"/><path d="M0 152C50 62 112 10 172 0" fill="none" stroke="#D9B25A" stroke-width="2.5"/><path d="M0 128C42 58 100 14 190 0" fill="none" stroke="#B8892B" stroke-width="1.2" opacity=".8"/></svg>';
+  var SWOOSH_BR = '<svg class="swoosh br" viewBox="0 0 250 112" aria-hidden="true" preserveAspectRatio="none"><path d="M250 22C200 52 130 92 60 112H250Z" fill="#0A2342"/><path d="M250 22C200 52 130 92 60 112" fill="none" stroke="#D9B25A" stroke-width="2.5"/><path d="M250 6C190 40 112 88 30 112" fill="none" stroke="#B8892B" stroke-width="1.2" opacity=".8"/></svg>';
+  var NODES = '<svg class="nodes" viewBox="0 0 400 112" aria-hidden="true" fill="none" stroke="#B8892B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M0 78 L28 40 L66 62 M66 62 L72 54 M112 62 L132 52 L150 66 M198 66 L226 46 L252 74 M290 64 L318 40 L346 58" opacity=".75"/>' +
+    '<g fill="#FBF8F0"><circle cx="28" cy="40" r="4"/><circle cx="132" cy="52" r="3"/><circle cx="226" cy="46" r="3.5"/><circle cx="318" cy="40" r="4"/><circle cx="346" cy="58" r="3"/></g>' +
+    '<g fill="#FBF8F0" stroke-width="1.5"><circle cx="90" cy="62" r="26"/><circle cx="174" cy="66" r="24"/><circle cx="268" cy="64" r="26"/></g>' +
+    '<g stroke-width="1.6"><path d="M90 48v28M80 76h20M80 54h20M80 54l-6 12a6 4 0 0 0 12 0zM100 54l-6 12a6 4 0 0 0 12 0z"/>' +
+    '<rect x="162" y="56" width="24" height="15" rx="1.5"/><path d="M158 74h32"/>' +
+    '<path d="M259 52h16v22h-16zM262 59h10M262 64h10M262 69h6M281 50l-9 15"/></g></svg>';
+
+  function crow(href, iconName, label, children, external) {
+    var inner = [h('span', { class: 'dot' }, [span(ICON[iconName])]), h('span', { class: 't' }, children)];
+    var attrs = { class: 'crow', 'aria-label': label };
+    if (!href) return h('div', attrs, inner);
+    attrs.href = href; if (external) { attrs.target = '_blank'; attrs.rel = 'noopener noreferrer'; }
+    return h('a', attrs, inner);
+  }
+  function renderCard(e) {
+    var unit = unitOf(e);
+    document.title = fullName(e) + ' · ' + (unit || orgName());
+    var rows = [];
+    if (trim(e.email)) {
+      var ep = trim(e.email).split('@'), ev = [document.createTextNode(ep[0])];
+      if (ep.length > 1) { ev.push(document.createTextNode('@'), document.createElement('wbr'), document.createTextNode(ep.slice(1).join('@'))); }
+      rows.push(crow('mailto:' + trim(e.email), 'mail', 'Email', ev));
+    }
+    if (trim(e.phone)) rows.push(crow(telHref(e.phone), 'phone', 'Phone', [trim(e.phone)]));
+    var li = normLinkedIn(e.linkedin);
+    if (li) {
+      var lp = shortUrl(li).split('/'), lv = [];
+      lp.forEach(function (part, i) { lv.push(document.createTextNode(part + (i < lp.length - 1 ? '/' : ''))); if (i < lp.length - 1) lv.push(document.createElement('wbr')); });
+      rows.push(crow(li, 'link', 'LinkedIn', lv, true));
+    }
+    var addr = addressLines(e);
+    if (addr.length) rows.push(crow(mapsUrl(e), 'pin', 'Office address', addr.map(function (l) { return h('div', { text: l }); }), true));
+
+    var logo = safeImg(DATA.org.logo), hero = safeImg(DATA.org.hero), site = safeHttps(trim(DATA.org.website));
+    var brand = h('div', { class: 'brand' }, [
+      logo ? h('img', { src: logo, alt: '' }) : null, logo ? h('span', { class: 'vr', 'aria-hidden': 'true' }) : null,
+      h('span', { class: 'org', text: orgName() })]);
+
+    var qrNode = null, qm = makeQR(buildVCard(e, true), 'L');
+    if (qm) qrNode = h('div', { class: 'qrcol' }, [
+      h('div', { class: 'qrbox' }, [h('img', { src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(qrSvg(qm, 1, 256)), alt: 'QR code that adds ' + fullName(e) + ' to your contacts' })]),
+      h('div', { class: 'qrcap' }, ['Scan to', h('br'), 'save contact'])]);
+
+    var card = h('article', { class: 'card', 'aria-label': 'Digital business card for ' + fullName(e) }, [
+      h('span', { svg: SWOOSH_TL, style: 'display:contents' }), h('span', { svg: SWOOSH_BR, style: 'display:contents' }),
+      hero ? h('img', { class: 'hero', src: hero, alt: '' }) : null,
+      brand,
+      h('h1', { class: 'person', text: fullName(e) }),
+      h('div', { class: 'bar', 'aria-hidden': 'true' }),
+      trim(e.title) ? h('div', { class: 'role', text: trim(e.title) }) : null,
+      unit ? h('div', { class: 'unit', text: unit }) : null,
+      h('div', { class: 'contact' }, [h('div', { class: 'crows' }, rows), qrNode]),
+      h('button', { class: 'btn-navy', type: 'button', onclick: function () { saveContact(e); } }, [span(ICON.save), h('span', { text: 'Save Contact' })]),
+      h('button', { class: 'sheetlink', type: 'button', text: 'Contact details', onclick: function () { openContactSheet(e); } }),
+      h('span', { svg: NODES, style: 'display:contents' }),
+      h('div', { class: 'foot' }, [site ? h('a', { href: site, target: '_blank', rel: 'noopener noreferrer', text: shortUrl(site) }) : null])
+    ]);
+    // decorative SVGs are built inside display:contents spans; lift them so the card's CSS targets them directly
+    Array.prototype.slice.call(card.querySelectorAll(':scope > span[style="display:contents"]')).forEach(function (w) {
+      while (w.firstChild) card.insertBefore(w.firstChild, w); w.remove();
+    });
+    var stage = h('main', { class: 'stage' });
+    var adminSeen = S.admin; try { adminSeen = adminSeen || sessionStorage.getItem('ogc-admin') === '1'; } catch (x) {}
+    if (adminSeen) stage.appendChild(h('div', { class: 'ownerbar' }, [h('a', { class: 'pill', href: '#admin', text: '← Back to the generator' })]));
+    stage.appendChild(card);
+    app.appendChild(stage);
+  }
+
+  function openContactSheet(e) {
+    var text = buildVCard(e).replace(/\r\n/g, '\n');
+    var nodes = [h('p', { class: 'note', text: 'If your phone doesn’t offer to add the contact, copy these details, or scan this code from another device’s camera.' })];
+    var m = makeQR(buildVCard(e, true), 'L');
+    if (m) nodes.push(h('div', { class: 'qrwrap' }, [h('img', { src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(qrSvg(m, 4, 600)), alt: 'QR code that adds ' + fullName(e) + ' to contacts' })]));
+    var ta = h('textarea', { class: 'vtext', readonly: true, 'aria-label': 'Contact file text' }); ta.value = text;
+    nodes.push(ta);
+    nodes.push(h('div', { class: 'btns' }, [h('button', { class: 'btn primary', type: 'button', text: 'Copy details', onclick: function () { copyText(text); } })]));
+    modal(fullName(e), nodes);
+  }
+
+  /* ---------------------------- generator ---------------------------- */
+  function field(label, name, val, opts) {
+    opts = opts || {};
+    var id = 'f-' + name + '-' + Math.floor(Math.random() * 1e6);
+    var inp = h('input', { id: id, name: name, type: opts.type || 'text', autocomplete: 'off', placeholder: opts.ph || '' }); inp.value = val || '';
+    var wrap = h('div', { class: 'fld' + (opts.full ? ' full' : '') }, [h('label', { for: id, text: label }), inp, opts.hint ? h('div', { class: 'hint', text: opts.hint }) : null]);
+    wrap.input = inp;
+    return wrap;
+  }
+  function showErr(f, msg) {
+    var old = f.querySelector('.err'); if (old) old.remove();
+    if (msg) f.appendChild(h('div', { class: 'err', text: msg }));
+  }
+  function readImage(file, kind) {
+    return new Promise(function (res, rej) {
+      if (file.size > 12 * 1024 * 1024) return rej(new Error('too big'));
+      var fr = new FileReader(); fr.onerror = rej;
+      fr.onload = function () {
+        if (file.type === 'image/svg+xml') { return file.size > 400 * 1024 ? rej(new Error('svg too big')) : res(fr.result); }
+        var img = new Image(); img.onerror = rej;
+        img.onload = function () {
+          var max = kind === 'hero' ? 1000 : 400, s = Math.min(1, max / Math.max(img.width, img.height));
+          var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(img.width * s)); cv.height = Math.max(1, Math.round(img.height * s));
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          res(kind === 'hero' ? cv.toDataURL('image/jpeg', 0.82) : cv.toDataURL('image/png'));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  function imageField(label, hint, initial, kind) {
+    var state = { url: safeImg(initial) };
+    var prev = h('img', { alt: '' }), removeBtn, wrap;
+    function sync() { if (state.url) { prev.src = state.url; prev.style.display = ''; } else prev.style.display = 'none'; removeBtn.style.display = state.url ? '' : 'none'; }
+    var file = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/svg+xml', style: 'display:none', onchange: function () {
+      var f = file.files && file.files[0]; if (!f) return;
+      readImage(f, kind).then(function (u) { state.url = u; sync(); toast('Image added. Select “Save settings” to apply it to every card.'); },
+        function () { toast('Couldn’t read that image. Use a PNG, JPG, WebP or SVG.'); });
+      file.value = '';
+    } });
+    removeBtn = h('button', { class: 'btn small', type: 'button', text: 'Remove', onclick: function () { state.url = ''; sync(); } });
+    wrap = h('div', { class: 'fld' }, [h('div', { class: 'lbl', text: label }), h('div', { class: 'upl' }, [prev, h('button', { class: 'btn small', type: 'button', text: 'Choose image', onclick: function () { file.click(); } }), removeBtn, file]), h('div', { class: 'hint', text: hint })]);
+    wrap.state = state; sync();
+    return wrap;
+  }
+  function downloadSite() {
+    var html = buildDoc(clone(DATA));
+    var ts = Number((html.match(/"updatedAt":(\d+)/) || [])[1]) || Date.now();
+    download('index.html', html, 'text/html;charset=utf-8');
+    DATA.updatedAt = ts; BASE_TS = ts; S.dirty = false; S.restored = false; clearDraft();
+    toast('Downloaded index.html. Upload it to your web host in place of the old file.');
+    if (route() === 'admin') render();
+  }
+  function commit(next, openQrSlug) {
+    DATA = next; S.dirty = true; writeDraft();
+    render();
+    if (openQrSlug) { var e = DATA.employees.filter(function (z) { return z.slug === openQrSlug; })[0]; if (e) openQR(e); }
+  }
+
+  function renderAdmin() {
+    var org = DATA.org, link = baseLink(), auto = !safeHttps(trim(org.baseLink)) && !!hostedUrl();
+    var wrap = h('main', { class: 'admin' });
+    wrap.appendChild(h('div', { class: 'admin-head' }, [h('h1', { text: 'Digital Business Card Generator' }), h('div', { class: 'orgline', text: orgName() })]));
+
+    if (S.dirty) wrap.appendChild(h('div', { class: 'banner', role: 'status' }, [
+      h('div', {}, [h('strong', { text: 'Your changes aren’t live yet. ' }), h('span', { class: 'note', text: S.restored ? 'Restored from this browser. ' : '' }),
+        h('span', { class: 'note', text: 'Download the updated file and upload it to your web host in place of the old one.' })]),
+      h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, [
+        h('button', { class: 'btn primary', type: 'button', text: 'Download updated file', onclick: downloadSite }),
+        h('button', { class: 'btn', type: 'button', text: 'Discard changes', onclick: function () {
+          confirmBox('Discard your changes?', 'Everything you changed since the last download will be lost.', 'Discard changes', function () { clearDraft(); S.dirty = false; DATA = loadData(); render(); });
+        } })])]));
+
+    var fName = field('Organization name', 'org', org.name, { ph: 'Georgia Institute of Technology' });
+    var fUnit = field('Office or unit (shown on every card)', 'unit', org.unit, { ph: 'Office of General Counsel' });
+    var fWeb = field('Website (optional)', 'web', org.website, { type: 'url', ph: 'https://' });
+    var fLink = field('Public card link', 'base', safeHttps(trim(org.baseLink)) || hostedUrl(), { type: 'url', ph: 'https://your-site.example/cards/index.html',
+      hint: auto ? 'Filled in from the address this file is being served from.' : 'The public web address where you host this file. Each QR code is this link plus the employee’s own code.' });
+    var fLogo = imageField('Logo (optional)', 'Your official logo, shown beside the organization name. A transparent PNG or SVG works best.', org.logo, 'logo');
+    var fHero = imageField('Header image (optional)', 'A photo that fades in at the top right of every card.', org.hero, 'hero');
+    wrap.appendChild(h('section', { class: 'panel' }, [
+      h('div', { class: 'list-head' }, [h('h2', { text: 'Setup' }), h('span', { class: 'status ' + (link ? 'ok' : 'warn'), text: link ? 'Card link set' : 'Card link needed' })]),
+      h('ol', { class: 'steps' }, [
+        h('li', { text: 'Upload this file to a web host so it has a public https address. Opening it from your computer works for editing, but QR codes need the public address.' }),
+        h('li', { text: 'Enter that address below and save settings.' }),
+        h('li', { text: 'Add employees and download each QR code. When you change anything, download the updated file and upload it over the old one. Existing QR codes keep working.' })]),
+      h('div', { class: 'grid2' }, [fName, fUnit, fWeb, fLink, fLogo, fHero]),
+      h('div', { class: 'btns' }, [h('button', { class: 'btn primary', type: 'button', text: 'Save settings', onclick: function () {
+        var l = trim(fLink.input.value).replace(/#.*$/, '');
+        showErr(fLink, ''); showErr(fWeb, '');
+        if (l && !safeHttps(l)) { showErr(fLink, 'The link must start with https://'); return; }
+        var web = trim(fWeb.input.value);
+        if (web && !safeHttps(web)) { showErr(fWeb, 'The website must start with https://'); return; }
+        var next = clone(DATA);
+        next.org = { name: trim(fName.input.value) || 'OGC', unit: trim(fUnit.input.value), website: web, baseLink: l, logo: fLogo.state.url, hero: fHero.state.url };
+        commit(next); toast('Settings saved. Download the updated file to publish them.');
+      } })]),
+      h('p', { class: 'note', style: 'margin-top:14px', text: 'Everything on a card is public to anyone with the link, and the page source contains every card. Only add details you’re comfortable sharing. Anyone can open the #admin page, but changes there only affect their own downloaded copy, never your hosted file.' })
+    ]));
+
+    var list = h('div');
+    var sorted = DATA.employees.slice().sort(function (a, b) { return (trim(a.last) + trim(a.first)).localeCompare(trim(b.last) + trim(b.first)); });
+    if (!sorted.length) list.appendChild(h('div', { class: 'empty', text: 'No employees yet. Add one, or import a list.' }));
+    sorted.forEach(function (e) {
+      list.appendChild(h('div', { class: 'emp' }, [
+        h('div', { class: 'mono', 'aria-hidden': 'true', text: initials(e) }),
+        h('div', { class: 'who' }, [h('div', { class: 'nm', text: fullName(e) + (trim(e.title) ? ', ' + trim(e.title) : '') }), h('div', { class: 'em', text: trim(e.email) })]),
+        h('div', { class: 'acts' }, [
+          h('button', { class: 'btn small primary', type: 'button', text: 'QR code', onclick: function () { openQR(e); } }),
+          h('button', { class: 'btn small', type: 'button', text: 'View card', onclick: function () { location.hash = e.slug; } }),
+          h('button', { class: 'btn small', type: 'button', text: 'Edit', onclick: function () { openEmployeeForm(e); } }),
+          h('button', { class: 'btn small danger', type: 'button', text: 'Delete', onclick: function () {
+            confirmBox('Delete ' + fullName(e) + '?', 'Their card and QR code will stop working once you upload the updated file.', 'Delete card', function () {
+              var next = clone(DATA); next.employees = next.employees.filter(function (x) { return x.id !== e.id; }); commit(next);
+            });
+          } })
+        ])
+      ]));
+    });
+    wrap.appendChild(h('section', { class: 'panel' }, [
+      h('div', { class: 'list-head' }, [h('h2', { text: 'Employees (' + DATA.employees.length + ')' }), h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, [
+        h('button', { class: 'btn primary', type: 'button', text: 'Add employee', onclick: function () { openEmployeeForm(null); } }),
+        h('button', { class: 'btn', type: 'button', text: 'Import from CSV', onclick: openImport })])]),
+      list
+    ]));
+    wrap.appendChild(h('div', { class: 'btns' }, [h('button', { class: 'btn' + (S.dirty ? ' primary' : ''), type: 'button', text: 'Download updated file', onclick: downloadSite })]));
+    app.appendChild(wrap);
+  }
+
+  function openEmployeeForm(emp) {
+    var e = emp || {};
+    var F = {
+      first: field('First name', 'first', e.first), last: field('Last name (optional)', 'last', e.last),
+      title: field('Job title', 'title', e.title), dept: field('Office override (optional)', 'dept', e.dept, { hint: 'Leave blank to use “' + (trim(DATA.org.unit) || 'the office set in Setup') + '”.' }),
+      email: field('Email', 'email', e.email, { type: 'email' }), phone: field('Phone', 'phone', e.phone, { type: 'tel', ph: '(404) 555-0100' }),
+      street: field('Office street address (optional)', 'street', e.street, { full: true }),
+      city: field('City', 'city', e.city), region: field('State or region', 'region', e.region),
+      postal: field('Postal code', 'postal', e.postal), country: field('Country', 'country', e.country),
+      linkedin: field('LinkedIn', 'linkedin', e.linkedin, { full: true, ph: 'linkedin.com/in/name', hint: 'Paste the profile link or just the profile name.' })
+    };
+    var grid = h('div', { class: 'grid2' }, Object.keys(F).map(function (k) { return F[k]; }));
+    var m = modal(emp ? 'Edit ' + fullName(e) : 'Add employee', [grid, h('div', { class: 'btns' }, [
+      h('button', { class: 'btn primary', type: 'button', text: emp ? 'Save changes' : 'Add employee', onclick: function () {
+        var v = {}; Object.keys(F).forEach(function (k) { v[k] = trim(F[k].input.value); showErr(F[k], ''); });
+        var bad = false;
+        if (!v.first) { showErr(F.first, 'Enter a first name.'); bad = true; }
+        if (!v.email || !isEmail(v.email)) { showErr(F.email, 'Enter a valid email address.'); bad = true; }
+        if (bad) return;
+        v.linkedin = normLinkedIn(v.linkedin);
+        var next = clone(DATA), rec;
+        if (emp) { rec = next.employees.filter(function (x) { return x.id === emp.id; })[0]; Object.keys(v).forEach(function (k) { rec[k] = v[k]; }); }
+        else { rec = v; rec.id = rand(10); rec.slug = newSlug(next.employees, v.first, v.last); next.employees.push(rec); }
+        m.close();
+        commit(next, emp ? null : rec.slug);
+      } }),
+      h('button', { class: 'btn', type: 'button', text: 'Cancel', onclick: function () { m.close(); } })])], true);
+  }
+
+  var CSV_KEYS = { first: 'first', firstname: 'first', givenname: 'first', last: 'last', lastname: 'last', surname: 'last', familyname: 'last',
+    title: 'title', jobtitle: 'title', position: 'title', department: 'dept', dept: 'dept', office: 'dept', email: 'email', emailaddress: 'email',
+    phone: 'phone', telephone: 'phone', tel: 'phone', phonenumber: 'phone', street: 'street', address: 'street', streetaddress: 'street', officeaddress: 'street',
+    city: 'city', state: 'region', region: 'region', province: 'region', zip: 'postal', zipcode: 'postal', postal: 'postal', postalcode: 'postal',
+    country: 'country', linkedin: 'linkedin', linkedinurl: 'linkedin' };
+  function parseCSV(t, d) {
+    var rows = [], row = [], f = '', q = false;
+    for (var i = 0; i < t.length; i++) {
+      var c = t.charAt(i);
+      if (q) { if (c === '"') { if (t.charAt(i + 1) === '"') { f += '"'; i++; } else q = false; } else f += c; }
+      else if (c === '"') q = true;
+      else if (c === d) { row.push(f); f = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && t.charAt(i + 1) === '\n') i++; row.push(f); f = ''; rows.push(row); row = []; }
+      else f += c;
+    }
+    if (f !== '' || row.length) { row.push(f); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (x) { return trim(x) !== ''; }); });
+  }
+  function openImport() {
+    var ta = h('textarea', { 'aria-label': 'CSV data', placeholder: 'first name,last name,title,email,phone,city,state,linkedin' });
+    var fld = h('div', { class: 'fld' }, [h('label', { text: 'Paste CSV or spreadsheet rows (header row first)' }), ta]);
+    var m = modal('Import employees', [
+      h('p', { class: 'note', style: 'margin-bottom:12px', text: 'Columns: first name, last name, title, office, email, phone, street, city, state, zip, country, linkedin. First name and email are required.' }), fld,
+      h('div', { class: 'btns' }, [
+        h('button', { class: 'btn primary', type: 'button', text: 'Import employees', onclick: function () {
+          var raw = ta.value.replace(/^\uFEFF/, ''); showErr(fld, '');
+          if (!trim(raw)) { showErr(fld, 'Paste at least a header row and one employee.'); return; }
+          var first = raw.split(/\r?\n/)[0], d = (first.indexOf('\t') > -1 && first.indexOf(',') === -1) ? '\t' : ',';
+          var rows = parseCSV(raw, d); if (rows.length < 2) { showErr(fld, 'Add a header row followed by at least one employee.'); return; }
+          var cols = rows[0].map(function (x) { return CSV_KEYS[String(x).toLowerCase().replace(/[^a-z]/g, '')] || null; });
+          if (cols.indexOf('first') < 0 || cols.indexOf('email') < 0) { showErr(fld, 'The header row needs first name and email columns.'); return; }
+          var next = clone(DATA), added = 0, skipped = 0;
+          rows.slice(1).forEach(function (r) {
+            var v = { first: '', last: '', title: '', dept: '', email: '', phone: '', street: '', city: '', region: '', postal: '', country: '', linkedin: '' };
+            cols.forEach(function (k, i) { if (k) v[k] = trim(r[i]); });
+            if (!v.first || !isEmail(v.email)) { skipped++; return; }
+            v.linkedin = normLinkedIn(v.linkedin); v.id = rand(10); v.slug = newSlug(next.employees, v.first, v.last);
+            next.employees.push(v); added++;
+          });
+          if (!added) { showErr(fld, 'No valid rows found. Each row needs a first name and a valid email.'); return; }
+          m.close();
+          commit(next);
+          toast(added + ' added' + (skipped ? ', ' + skipped + ' skipped for missing details.' : '.'));
+        } }),
+        h('button', { class: 'btn', type: 'button', text: 'Download template', onclick: function () {
+          download('employees-template.csv', 'first name,last name,title,office,email,phone,street,city,state,zip,country,linkedin\n', 'text/csv;charset=utf-8');
+        } })])], true);
+  }
+
+  function openQR(e) {
+    var url = cardUrl(e), name = fullName(e);
+    if (!url) { modal('QR code', [h('p', { class: 'note warn', text: 'Enter the public card link in Setup first. QR codes are built from it, so they can’t be made until it’s set.' })]); return; }
+    var m = makeQR(url);
+    if (!m) { modal('QR code', [h('p', { class: 'note warn', text: 'That link is too long to fit in a QR code. Use a shorter link.' })]); return; }
+    var cv = qrCanvas(m, name, unitOf(e) || orgName());
+    var urlInp = h('input', { type: 'text', readonly: true, 'aria-label': 'Card link' }); urlInp.value = url;
+    var base = 'QR-' + fileSafe(name);
+    modal(name, [
+      h('div', { class: 'qrwrap' }, [h('img', { src: cv.toDataURL('image/png'), alt: 'QR code linking to ' + name + '’s digital card' })]),
+      h('div', { class: 'urlrow fld' }, [urlInp, h('button', { class: 'btn', type: 'button', text: 'Copy link', onclick: function () { copyText(url); } })]),
+      h('div', { class: 'btns' }, [
+        h('button', { class: 'btn primary', type: 'button', text: 'Download PNG', onclick: function () { cv.toBlob(function (b) { if (b) download(base + '.png', b); }, 'image/png'); } }),
+        h('button', { class: 'btn', type: 'button', text: 'Download SVG', onclick: function () { download(base + '.svg', qrSvg(m), 'image/svg+xml'); } }),
+        h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener noreferrer', text: 'Open as a visitor' })]),
+      h('p', { class: 'note', style: 'margin-top:12px', text: 'The code is permanent. Editing this person’s details never changes it. The card goes live once the updated file is uploaded to your host.' })
+    ]);
+  }
+
+  /* ---------- start ---------- */
+  render();
+  window.addEventListener('hashchange', render);
+})();
+</script>
+</body>
+</html>
