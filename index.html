@@ -531,8 +531,12 @@ a.crow:hover .t { text-decoration: underline; text-decoration-color: var(--gold)
     step.then(function (done) {
       if (done) return;
       if (isIOS()) {
-        var a = document.createElement('a'); a.href = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(text); a.rel = 'noopener'; a.style.display = 'none';
-        document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 3000);
+        var go = function (href) { var a = document.createElement('a'); a.href = href; a.rel = 'noopener'; a.style.display = 'none'; document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 3000); };
+        var fallback = function () { go('data:text/vcard;charset=utf-8,' + encodeURIComponent(text)); };
+        var reg = navigator.serviceWorker && navigator.serviceWorker.getRegistration ? navigator.serviceWorker.getRegistration() : Promise.resolve(null);
+        reg.then(function (r) { return !!(r && r.active); }, function () { return false; }).then(function (ok) {
+          if (ok) go(new URL('contact.vcf', location.href).href.replace(/[#?].*$/, '') + '?d=' + b64uEnc(text)); else fallback();
+        });
       } else download(fname, blob);
       toast(isIOS() ? 'If the contact screen doesn’t open, use “Contact details” below the button.' : 'Contact file sent to your device. If nothing opens, use “Contact details” below the button.');
     });
@@ -716,7 +720,7 @@ a.crow:hover .t { text-decoration: underline; text-decoration-color: var(--gold)
     var F = {
       first: field('First name', 'first', ''), last: field('Last name (optional)', 'last', ''),
       title: field('Job title', 'title', '', { full: true }),
-      email: field('Work email', 'email', '', { type: 'email', full: true, hint: dom ? 'Must end in @' + dom : '' }),
+      email: field('Work email', 'email', '', { type: 'email', full: true }),
       phone: field('Phone (optional)', 'phone', '', { type: 'tel', full: true, ph: '(404) 555-0100' }),
       street: field('Office street address (optional)', 'street', '', { full: true }),
       city: field('City', 'city', ''), region: field('State or region', 'region', ''),
@@ -1009,6 +1013,7 @@ a.crow:hover .t { text-decoration: underline; text-decoration-color: var(--gold)
   /* ---------- start ---------- */
   render();
   window.addEventListener('hashchange', render);
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (x) {} }
 })();
 </script>
 </body>
