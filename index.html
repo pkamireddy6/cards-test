@@ -518,7 +518,8 @@ a.crow:hover .t { text-decoration: underline; text-decoration-color: var(--gold)
     var blob = new Blob([text], { type: 'text/vcard;charset=utf-8' });
     var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
     var step = Promise.resolve(false);
-    if (coarse && navigator.canShare && typeof File === 'function') {
+    // iPhones go straight to the contact screen; Android uses the share sheet, then a download
+    if (coarse && !isIOS() && navigator.canShare && typeof File === 'function') {
       step = new Promise(function (res) {
         try {
           var file = new File([blob], fname, { type: 'text/vcard' });
@@ -533,7 +534,7 @@ a.crow:hover .t { text-decoration: underline; text-decoration-color: var(--gold)
         var a = document.createElement('a'); a.href = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(text); a.rel = 'noopener'; a.style.display = 'none';
         document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 3000);
       } else download(fname, blob);
-      toast('Contact file sent to your device. If nothing opens, use “Contact details” below the button.');
+      toast(isIOS() ? 'If the contact screen doesn’t open, use “Contact details” below the button.' : 'Contact file sent to your device. If nothing opens, use “Contact details” below the button.');
     });
   }
 
